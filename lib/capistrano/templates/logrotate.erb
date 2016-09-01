@@ -1,0 +1,14 @@
+#{current_path}/log/*.log {
+    daily
+    missingok
+    rotate 30
+    size 10M
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+    sharedscripts
+    postrotate
+      touch #{current_path}/tmp/restart.txt
+    endscript
+}
