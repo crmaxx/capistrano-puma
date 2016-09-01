@@ -10,7 +10,7 @@ namespace :load do
     set :puma_rackup, -> { File.join(current_path, 'config.ru') }
     set :puma_state, -> { File.join(shared_path, 'tmp', 'pids', 'puma.state') }
     set :puma_pid, -> { File.join(shared_path, 'tmp', 'pids', 'puma.pid') }
-    set :puma_bind, -> { File.join("unix://#{shared_path}", 'tmp', 'sockets', 'puma.sock') }
+    set :puma_bind, -> { Filee.join("unix://#{shared_path}", 'tmp', 'sockets', 'puma.sock') }
     set :puma_default_control_app, -> { File.join("unix://#{shared_path}", 'tmp', 'sockets', 'pumactl.sock') }
     set :puma_conf, -> { File.join(shared_path, 'puma.rb') }
     set :puma_access_log, -> { File.join(shared_path, 'log', 'puma_access.log') }
@@ -35,7 +35,6 @@ namespace :deploy do
 end
 
 namespace :puma do
-
   desc 'Setup Puma config file'
   task :config do
     on roles(fetch(:puma_role)) do |role|
@@ -45,7 +44,7 @@ namespace :puma do
 
   desc 'Start puma'
   task :start do
-    on roles (fetch(:puma_role)) do |role|
+    on roles(fetch(:puma_role)) do |role|
       puma_switch_user(role) do
         if test "[ -f #{fetch(:puma_conf)} ]"
           info "using conf file #{fetch(:puma_conf)}"
@@ -61,10 +60,10 @@ namespace :puma do
     end
   end
 
-  %w[halt stop status].map do |command|
+  %w(halt stop status).map do |command|
     desc "#{command} puma"
     task command do
-      on roles (fetch(:puma_role)) do |role|
+      on roles(fetch(:puma_role)) do |role|
         within current_path do
           puma_switch_user(role) do
             with rack_env: fetch(:puma_env) do
@@ -76,7 +75,7 @@ namespace :puma do
                   execute :rm, fetch(:puma_pid)
                 end
               else
-                #pid file not found, so puma is probably not running or it using another pidfile
+                # pid file not found, so puma is probably not running or it using another pidfile
                 warn 'Puma not running'
               end
             end
@@ -86,14 +85,14 @@ namespace :puma do
     end
   end
 
-  %w[phased-restart restart].map do |command|
+  %w(phased-restart restart).map do |command|
     desc "#{command} puma"
     task command do
-      on roles (fetch(:puma_role)) do |role|
+      on roles(fetch(:puma_role)) do |role|
         within current_path do
           puma_switch_user(role) do
             with rack_env: fetch(:puma_env) do
-              if test "[ -f #{fetch(:puma_pid)} ]" and test :kill, "-0 $( cat #{fetch(:puma_pid)} )"
+              if test "[ -f #{fetch(:puma_pid)} ]" && test(:kill, "-0 $( cat #{fetch(:puma_pid)} )")
                 # NOTE pid exist but state file is nonsense, so ignore that case
                 execute :pumactl, "-S #{fetch(:puma_state)} -F #{fetch(:puma_conf)} #{command}"
               else
@@ -108,17 +107,16 @@ namespace :puma do
   end
 
   task :check do
-    on roles (fetch(:puma_role)) do |role|
-      #Create puma.rb for new deployments
-      unless  test "[ -f #{fetch(:puma_conf)} ]"
+    on roles(fetch(:puma_role)) do |role|
+      # Create puma.rb for new deployments
+      unless test "[ -f #{fetch(:puma_conf)} ]"
         warn 'puma.rb NOT FOUND!'
-        #TODO DRY
+        # TODO DRY
         template_puma 'puma', fetch(:puma_conf), role
         info 'puma.rb generated'
       end
     end
   end
-
 
   task :smart_restart do
     if !puma_preload_app? && puma_workers.to_i > 1
@@ -141,10 +139,10 @@ namespace :puma do
 
   def puma_user(role)
     properties = role.properties
-    properties.fetch(:puma_user) ||               # local property for puma only
-    fetch(:puma_user) ||
-    properties.fetch(:run_as) || # global property across multiple capistrano gems
-    role.user
+    properties.fetch(:puma_user) || # local property for puma only
+      fetch(:puma_user) ||
+      properties.fetch(:run_as) || # global property across multiple capistrano gems
+      role.user
   end
 
   def puma_workers
@@ -169,17 +167,17 @@ namespace :puma do
 
   def template_puma(from, to, role)
     [
-        "lib/capistrano/templates/#{from}-#{role.hostname}-#{fetch(:stage)}.rb",
-        "lib/capistrano/templates/#{from}-#{role.hostname}.rb",
-        "lib/capistrano/templates/#{from}-#{fetch(:stage)}.rb",
-        "lib/capistrano/templates/#{from}.rb.erb",
-        "lib/capistrano/templates/#{from}.rb",
-        "lib/capistrano/templates/#{from}.erb",
-        "config/deploy/templates/#{from}.rb.erb",
-        "config/deploy/templates/#{from}.rb",
-        "config/deploy/templates/#{from}.erb",
-        File.expand_path("../../templates/#{from}.rb.erb", __FILE__),
-        File.expand_path("../../templates/#{from}.erb", __FILE__)
+      "lib/capistrano/templates/#{from}-#{role.hostname}-#{fetch(:stage)}.rb",
+      "lib/capistrano/templates/#{from}-#{role.hostname}.rb",
+      "lib/capistrano/templates/#{from}-#{fetch(:stage)}.rb",
+      "lib/capistrano/templates/#{from}.rb.erb",
+      "lib/capistrano/templates/#{from}.rb",
+      "lib/capistrano/templates/#{from}.erb",
+      "config/deploy/templates/#{from}.rb.erb",
+      "config/deploy/templates/#{from}.rb",
+      "config/deploy/templates/#{from}.erb",
+      File.expand_path("../../templates/#{from}.rb.erb", __FILE__),
+      File.expand_path("../../templates/#{from}.erb", __FILE__)
     ].each do |path|
       if File.file?(path)
         erb = File.read(path)
@@ -193,5 +191,4 @@ namespace :puma do
     after 'deploy:check', 'puma:check'
     after 'deploy:finished', 'puma:smart_restart'
   end
-
 end

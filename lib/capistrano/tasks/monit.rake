@@ -67,6 +67,5 @@ namespace :puma do
         execute command
       end
     end
-
   end
 end

@@ -11,6 +11,7 @@ namespace :load do
     set :nginx_use_ssl, false
   end
 end
+
 namespace :puma do
   desc 'Setup nginx configuration'
   task :nginx_config do

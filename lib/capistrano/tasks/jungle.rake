@@ -5,10 +5,8 @@ namespace :load do
   end
 end
 
-
 namespace :puma do
   namespace :jungle do
-
     desc 'Install Puma jungle'
     task :install do
       on roles(fetch(:puma_role)) do |role|
@@ -17,26 +15,24 @@ namespace :puma do
         execute "chmod +x #{fetch(:tmp_dir)}/run-puma"
         sudo "mv #{fetch(:tmp_dir)}/run-puma #{fetch(:puma_run_path)}"
         if test '[ -f /etc/redhat-release ]'
-          #RHEL flavor OS
+          # RHEL flavor OS
           rhel_install
         elsif test '[ -f /etc/lsb-release ]'
-          #Debian flavor OS
+          # Debian flavor OS
           debian_install
         else
-          #Some other OS
+          # Some other OS
           error 'This task is not supported for your OS'
         end
         sudo "touch #{fetch(:puma_jungle_conf)}"
       end
     end
 
-
     def debian_install
       template_puma 'puma-deb', "#{fetch(:tmp_dir)}/puma", @role
       execute "chmod +x #{fetch(:tmp_dir)}/puma"
       sudo "mv #{fetch(:tmp_dir)}/puma /etc/init.d/puma"
       sudo 'update-rc.d -f puma defaults'
-
     end
 
     def rhel_install
@@ -45,7 +41,6 @@ namespace :puma do
       sudo "mv #{fetch(:tmp_dir)}/puma /etc/init.d/puma"
       sudo 'chkconfig --add puma'
     end
-
 
     desc 'Setup Puma config and install jungle script'
     task :setup do
@@ -68,7 +63,7 @@ namespace :puma do
       end
     end
 
-    %w[start stop restart status].each do |command|
+    %w(start stop restart status).each do |command|
       desc "#{command} puma"
       task command do
         on roles(fetch(:puma_role)) do
@@ -76,6 +71,5 @@ namespace :puma do
         end
       end
     end
-
   end
 end
