@@ -1,4 +1,4 @@
-To create local nginx and puma configuration files call
+To create local configuration files call
 
     rails generate capistrano:nginx_puma:config [path]
 
