@@ -1,7 +1,7 @@
 namespace :load do
   task :defaults do
     set :logrotate_role, :app
-    set :logrotate_conf, "/etc/logrotate.d/#{application}"
+    set :logrotate_conf, "/etc/logrotate.d/#{fetch(:application)}"
   end
 end
 
