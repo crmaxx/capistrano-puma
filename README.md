@@ -24,6 +24,7 @@ And then execute:
     require 'capistrano/puma/jungle'  # if you need the jungle tasks
     require 'capistrano/puma/monit'   # if you need the monit tasks
     require 'capistrano/puma/nginx'   # if you want to upload a nginx site template
+    require 'capistrano/puma/logrotate' # if you need the logrotate tasks
 ```
 
 ### Config
@@ -32,7 +33,7 @@ To list available tasks use `cap -T`
 
 To upload puma config use:
 ```ruby
-cap puma:config 
+cap puma:config
 ```
 By default the file located in  `shared/puma.config`
 

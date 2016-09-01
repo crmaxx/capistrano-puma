@@ -11,7 +11,7 @@ elif [ -d "/usr/local/rbenv/bin" ]; then
 fi
 
 if [ -e Gemfile ]; then
-    exec <%= fetch(:puma_user) ? "sudo -u #{puma_user(@role)}" : '' %> sh -c "RAILS_ENV=<%= fetch(:stage) %> exec bundle exec puma -C <%= fetch(:puma_conf) %> --daemon"
+    exec <%= fetch(:puma_user) ? "sudo -u #{puma_user(@role)}" : '' %> sh -c "RAILS_ENV=<%= fetch(:puma_env) %> exec bundle exec puma -C <%= fetch(:puma_conf) %> --daemon"
 else
     exec <%= fetch(:puma_user) ? "sudo -u #{puma_user(@role)}" : '' %> sh -c "exec puma -C <%= fetch(:puma_conf) %> --daemon"
 fi

@@ -36,7 +36,7 @@ namespace :puma do
     end
 
     def rhel_install
-      template_puma 'puma-rpm', "#{fetch(:tmp_dir)}/puma" , @role
+      template_puma 'puma-rpm', "#{fetch(:tmp_dir)}/puma", @role
       execute "chmod +x #{fetch(:tmp_dir)}/puma"
       sudo "mv #{fetch(:tmp_dir)}/puma /etc/init.d/puma"
       sudo 'chkconfig --add puma'
