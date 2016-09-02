@@ -179,11 +179,12 @@ namespace :puma do
       File.expand_path("../../templates/#{from}.rb.erb", __FILE__),
       File.expand_path("../../templates/#{from}.erb", __FILE__)
     ].each do |path|
-      if File.file?(path)
-        erb = File.read(path)
-        upload! StringIO.new(ERB.new(erb, nil, '-').result(binding)), to
-        break
-      end
+      next unless File.file?(path)
+      erb = File.read(path)
+      dir = File.dirname(to)
+      execute(:mkdir, "-p", dir)
+      upload! StringIO.new(ERB.new(erb, nil, '-').result(binding)), to
+      break
     end
   end
 
