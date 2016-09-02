@@ -32,6 +32,14 @@ RUNPUMA=<%=fetch(:puma_run_path)%>
 # Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
 . /lib/lsb/init-functions
 
+if [ -d "$HOME/.rbenv/bin" ]; then
+  PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$PATH"
+  eval "$(rbenv init -)"
+elif [ -d "/usr/local/rbenv/bin" ]; then
+  PATH="/usr/local/rbenv/bin:/usr/local/rbenv/shims:$PATH"
+  eval "$(rbenv init -)"
+fi
+
 #
 # Function that starts the jungle
 #
@@ -101,7 +109,7 @@ do_stop_one() {
       log_daemon_msg "---> Puma $1 isn't running."
     else
       log_daemon_msg "---> About to kill PID `cat $PIDFILE`"
-      su - $2 -c "pumactl --state $STATEFILE stop"
+      cd $1 && su - $2 -c "bundle exec pumactl --state $STATEFILE stop"
       # Many daemons don't delete their pidfiles when they exit.
       rm -f $PIDFILE $STATEFILE
     fi
@@ -132,8 +140,8 @@ do_restart_one() {
 
   if [ -e $PIDFILE ]; then
     log_daemon_msg "--> About to restart puma $1"
-    su - $2 -c "pumactl --state $dir/tmp/pids/puma.state restart"
-    # kill -s USR2 `cat $PIDFILE`
+    # su - $2 -c "pumactl --state $dir/tmp/pids/puma.state restart"
+    kill -s USR2 `cat $PIDFILE`
     # TODO Check if process exist
   else
     log_daemon_msg "--> Your puma was never playing... Let's get it out there first"
@@ -174,7 +182,7 @@ do_status_one() {
   if [ -e $PIDFILE ]; then
     log_daemon_msg "--> About to status puma $1"
 
-    su - $2 -c "pumactl --state $dir/tmp/pids/puma.state stats "
+    cd $1 && su - $2 -c "bundle exec pumactl --state $dir/tmp/pids/puma.state stats "
 
   else
     log_daemon_msg "--> $1 isn't there :(..."
