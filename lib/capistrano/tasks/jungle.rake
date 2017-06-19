@@ -17,7 +17,7 @@ namespace :puma do
         if test '[ -f /etc/redhat-release ]'
           # RHEL flavor OS
           rhel_install
-        elsif test '[ -f /etc/lsb-release ]'
+        elsif test('[ -f /etc/lsb-release ]') || test('[ -f /etc/os-release ]') || test('[ -f /etc/debian-release ]')
           # Debian flavor OS
           debian_install
         else
