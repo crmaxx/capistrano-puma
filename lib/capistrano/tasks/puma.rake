@@ -10,7 +10,7 @@ namespace :load do
     set :puma_rackup, -> { File.join(current_path, 'config.ru') }
     set :puma_state, -> { File.join(shared_path, 'tmp', 'pids', 'puma.state') }
     set :puma_pid, -> { File.join(shared_path, 'tmp', 'pids', 'puma.pid') }
-    set :puma_bind, -> { Filee.join("unix://#{shared_path}", 'tmp', 'sockets', 'puma.sock') }
+    set :puma_bind, -> { File.join("unix://#{shared_path}", 'tmp', 'sockets', 'puma.sock') }
     set :puma_default_control_app, -> { File.join("unix://#{shared_path}", 'tmp', 'sockets', 'pumactl.sock') }
     set :puma_conf, -> { File.join(shared_path, 'puma.rb') }
     set :puma_access_log, -> { File.join(shared_path, 'log', 'puma_access.log') }
