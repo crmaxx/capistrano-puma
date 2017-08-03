@@ -73,7 +73,7 @@ namespace :puma do
     end
 
     desc "restart puma"
-    task restart do
+    task :restart do
       on roles(fetch(:puma_role)) do
         sudo "service puma stop #{current_path}"
         sudo "service puma start #{current_path}"
