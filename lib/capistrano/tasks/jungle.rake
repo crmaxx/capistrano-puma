@@ -51,7 +51,7 @@ namespace :puma do
 
     desc 'Add current project to the jungle'
     task :add do
-      on roles(fetch(:puma_role)) do|role|
+      on roles(fetch(:puma_role)) do |role|
         sudo "/etc/init.d/puma add '#{current_path}' #{fetch(:puma_user, role.user)}"
       end
     end
@@ -63,12 +63,20 @@ namespace :puma do
       end
     end
 
-    %w(start stop restart status).each do |command|
+    %w[start stop status].each do |command|
       desc "#{command} puma"
       task command do
         on roles(fetch(:puma_role)) do
           sudo "service puma #{command} #{current_path}"
         end
+      end
+    end
+
+    desc "restart puma"
+    task restart do
+      on roles(fetch(:puma_role)) do
+        sudo "service puma stop #{current_path}"
+        sudo "service puma start #{current_path}"
       end
     end
   end
